@@ -1,0 +1,32 @@
+<div class="rounded-2xl p-5 mb-0 border"
+  style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);">
+
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-2 h-2 rounded-full" style="background: #c084fc;"></div>
+    <span class="text-xs uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">
+      Historial de canciones
+    </span>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3">
+    <div *ngFor="let item of history"
+      class="rounded-xl p-3 cursor-pointer border transition-all"
+      style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08);"
+      (mouseenter)="onHover($event, true)"
+      (mouseleave)="onHover($event, false)">
+      <div class="text-xs uppercase tracking-wider mb-1"
+        style="color: rgba(192,132,252,0.7);">
+        {{item.mood}}
+      </div>
+      <div class="text-xs mb-1"
+        style="color: rgba(255,255,255,0.6);">
+        {{item.title}}
+      </div>
+      <div class="text-xs"
+        style="color: rgba(255,255,255,0.25);">
+        {{item.date}}
+      </div>
+    </div>
+  </div>
+
+</div>
