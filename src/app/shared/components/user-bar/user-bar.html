@@ -62,13 +62,23 @@
 
   <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-widest" style="color: rgba(255,255,255,0.4);">Tu apodo</label>
-    <div class="flex items-center rounded-lg overflow-hidden border"
-      style="background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); width: 220px;">
-      <span class="px-3 text-sm border-r flex items-center h-9"
-        style="color: rgba(192,132,252,0.6); border-color: rgba(255,255,255,0.1); background: rgba(192,132,252,0.07);">@</span>
-      <input type="text" placeholder="MusicLover99"
-        class="bg-transparent border-none outline-none text-sm px-3 flex-1"
-        style="color: white;" />
+    <div class="flex items-center gap-2">
+      <div class="flex items-center rounded-lg overflow-hidden border"
+        style="background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); width: 180px;">
+        <span class="px-3 text-sm border-r flex items-center h-9"
+          style="color: rgba(192,132,252,0.6); border-color: rgba(255,255,255,0.1); background: rgba(192,132,252,0.07);">@</span>
+        <input type="text" placeholder="MusicLover99"
+          [(ngModel)]="apodo"
+          class="bg-transparent border-none outline-none text-sm px-3 flex-1"
+          style="color: white;" />
+      </div>
+      <button
+        (click)="guardarApodo()"
+        class="px-3 h-9 rounded-lg text-xs font-medium cursor-pointer border-none transition-all"
+        style="background: rgba(192,132,252,0.2); color: #c084fc; border: 0.5px solid rgba(192,132,252,0.4);">
+        {{ guardado ? '✓ Guardado' : 'Guardar' }}
+      </button>
     </div>
   </div>
+
 </div>
