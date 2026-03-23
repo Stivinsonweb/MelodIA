@@ -12,7 +12,7 @@
 
 ## 📸 Capturas del proyecto
 
-![MelodIA - Diseño principal](./screenshot.png)
+![MelodIA - Diseño principal](./MelodIA.png)
 
 > Vista principal con fondo estrellado, selector de avatar, panel de entrada de emociones, panel de canción generada con reproductor, historial y footer con los desarrolladores.
 
