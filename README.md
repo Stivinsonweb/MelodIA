@@ -1,6 +1,6 @@
 # 🎵 MelodIA
 
-> **MelodIA** transforma tus emociones en canciones originales. Sube una imagen o describe cómo te sientes, y nuestra IA compone la melodía, escribe la letra y la canta — todo en segundos.
+> **MelodIA** convierte tus emociones en canciones originales. Sube una imagen o escribe cómo te sientes, la IA analiza tu estado de ánimo, compone una melodía única, genera la letra y la canta con voz sintetizada, mostrando la partitura animada en tiempo real.
 
 ---
 
@@ -12,7 +12,9 @@
 
 ## 📸 Capturas del proyecto
 
-> *GIFs y capturas se agregarán durante el desarrollo*
+![MelodIA - Diseño principal](./screenshot.png)
+
+> Vista principal con fondo estrellado, selector de avatar, panel de entrada de emociones, panel de canción generada con reproductor, historial y footer con los desarrolladores.
 
 ---
 
@@ -49,7 +51,7 @@
 
 ### Infraestructura — CubePath
 
-MelodIA está completamente desplegada en **[CubePath](https://midu.link/cubepath)**, utilizando dos de sus servicios principales:
+MelodIA está completamente desplegada en **[CubePath](https://midu.link/cubepath)**, utilizando tres servicios principales:
 
 #### ⚙️ N8N — Orquestador de la pipeline IA
 
@@ -63,9 +65,13 @@ N8N es el cerebro de toda la automatización de MelodIA. Desplegado con un solo 
 
 Sin N8N en CubePath, la orquestación entre múltiples APIs de IA sería imposible de gestionar de forma tan limpia y escalable.
 
-#### 🐳 Portainer — Hosting del frontend
+#### 🌐 HestiaCP — Hosting del frontend
 
-Portainer gestiona el contenedor Docker donde corre el build de producción de la app Angular. Desde CubePath, permite desplegar y exponer la aplicación con una URL pública accesible para la demo.
+HestiaCP hospeda el build de producción de la app Angular directamente desde CubePath, exponiendo la URL pública accesible para la demo del hackathon.
+
+#### 🗄️ NocoDB — Base de datos
+
+NocoDB almacena el historial de canciones generadas por los usuarios, guardando el mood detectado, la letra, el audio y la fecha de cada canción.
 
 #### 🏗️ Arquitectura completa
 
@@ -78,9 +84,9 @@ Portainer gestiona el contenedor Docker donde corre el build de producción de l
                           ↙     ↓      ↘
                      [Gemini] [Suno] [ElevenLabs]
                        mood   música    voz
-                                  ↓
-                       [Portainer en CubePath]
-                         (hosting del frontend)
+                          ↓              ↓
+                   [NocoDB CubePath]  [HestiaCP CubePath]
+                    (base de datos)   (hosting frontend)
 ```
 
 ---
