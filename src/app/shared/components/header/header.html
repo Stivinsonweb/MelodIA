@@ -24,8 +24,11 @@
 
     <!-- Con sesión -->
     <div *ngIf="user" class="flex items-center gap-3">
-      <img [src]="user.picture" class="w-8 h-8 rounded-full border-2" style="border-color: #c084fc;" />
-      <span class="text-sm" style="color: rgba(255,255,255,0.8);">{{ user.name }}</span>
+      <img [src]="user.picture" class="w-9 h-9 rounded-full border-2" style="border-color: #c084fc;" />
+      <div class="flex flex-col items-start">
+        <span class="text-sm font-medium" style="color: rgba(255,255,255,0.9);">{{ user.name }}</span>
+        <span *ngIf="user.apodo" class="text-xs" style="color: rgba(192,132,252,0.7);">@{{ user.apodo }}</span>
+      </div>
       <button
         (click)="logout()"
         class="px-3 py-1 rounded-lg text-xs border cursor-pointer transition-all"

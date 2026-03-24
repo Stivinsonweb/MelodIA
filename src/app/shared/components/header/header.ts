@@ -29,28 +29,38 @@ export class Header implements OnInit {
     if (savedUser) {
       this.user = JSON.parse(savedUser);
     }
+
+    // Escuchar cambios en localStorage para actualizar apodo e icono
+    window.addEventListener('storage', () => {
+      const updated = localStorage.getItem('melodia_user');
+      if (updated) this.user = JSON.parse(updated);
+    });
   }
 
   getUserInfo(accessToken: string): void {
     fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
       .then(res => res.json())
       .then(data => {
+        const existingUser = localStorage.getItem('melodia_user');
+        const existing = existingUser ? JSON.parse(existingUser) : {};
+
         this.user = {
           google_id: data.sub,
           name: data.name,
           email: data.email,
-          picture: data.picture
+          picture: data.picture,
+          apodo: existing.apodo || '',
+          icono_index: existing.icono_index || 0
         };
         localStorage.setItem('melodia_user', JSON.stringify(this.user));
 
-        // Guardar en base de datos
         this.usuarioService.guardarUsuario({
           google_id: data.sub,
           nombre: data.name,
           email: data.email,
           foto_url: data.picture,
-          apodo: '',
-          icono_index: 0
+          apodo: this.user.apodo,
+          icono_index: this.user.icono_index
         }).subscribe({
           next: (res: any) => {
             console.log('Usuario guardado:', res);

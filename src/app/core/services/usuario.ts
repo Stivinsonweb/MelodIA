@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class UsuarioService {
-  private apiUrl = 'http://vps22920.cubepath.net/api';
+  private apiUrl = 'https://vps22920.cubepath.net/api';
 
   constructor(private http: HttpClient) {}
 

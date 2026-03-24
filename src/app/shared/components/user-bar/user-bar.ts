@@ -14,6 +14,7 @@ export class UserBar implements OnInit {
   selectedIndex = 0;
   apodo = '';
   guardado = false;
+  isLoggedIn = false;
 
   constructor(private usuarioService: UsuarioService) {}
 
@@ -23,10 +24,13 @@ export class UserBar implements OnInit {
       const user = JSON.parse(savedUser);
       this.apodo = user.apodo || '';
       this.selectedIndex = user.icono_index || 0;
+      this.isLoggedIn = true;
     }
   }
 
   guardarApodo(): void {
+    if (!this.isLoggedIn) return;
+
     const savedUser = localStorage.getItem('melodia_user');
     if (!savedUser) return;
 
@@ -34,6 +38,9 @@ export class UserBar implements OnInit {
     user.apodo = this.apodo;
     user.icono_index = this.selectedIndex;
     localStorage.setItem('melodia_user', JSON.stringify(user));
+
+    // Notificar al header del cambio
+    window.dispatchEvent(new Event('storage'));
 
     this.usuarioService.guardarUsuario({
       google_id: user.google_id,
