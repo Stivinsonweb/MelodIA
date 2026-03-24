@@ -73,7 +73,36 @@ HestiaCP hospeda el build de producción de la app Angular directamente desde Cu
 
 NocoDB almacena el historial de canciones generadas por los usuarios, guardando el mood detectado, la letra, el audio y la fecha de cada canción.
 
+---
+
+## 🔐 Autenticación con Google (OAuth 2.0)
+
+La aplicación incluye un flujo de autenticación exclusivo con Google. Al iniciar sesión, el servidor:
+
+- Valida `state`/`nonce` y usa PKCE
+- Verifica el `id_token` contra las claves públicas de Google
+- Restringe dominios permitidos (por defecto solo `gmail.com` / `googlemail.com`)
+- Crea sesión persistente con cookie `HttpOnly` y cierre de sesión con revocación de token
+- Registra auditoría en `data/auth-audit.log` y persiste usuarios/sesiones en `data/auth-db.json`
+
+### Variables de entorno requeridas
+
+Define estas variables antes de ejecutar el servidor (dev o producción):
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `SESSION_SECRET`
+
+Opcionales:
+
+- `ALLOWED_GOOGLE_DOMAINS` (lista separada por comas, p. ej. `gmail.com,googlemail.com`)
+- `SESSION_TTL_DAYS` (por defecto `30`)
+- `APP_ORIGIN` (p. ej. `http://localhost:4200` o `https://tu-dominio.com`)
+- `SECURITY_WEBHOOK_URL` (URL para notificaciones de actividad sospechosa)
+
 #### 🏗️ Arquitectura completa
+
+```
 
 ```
 [Usuario]

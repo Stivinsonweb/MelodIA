@@ -1,61 +1,48 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { UsuarioService } from '../../../core/services/usuario';
+import { Component, OnInit, inject, PLATFORM_ID, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './user-bar.html',
   styleUrl: './user-bar.css'
 })
 export class UserBar implements OnInit {
+  auth = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
+  authError = signal<string | null>(null);
   selectedIndex = 0;
-  apodo = '';
-  guardado = false;
-  isLoggedIn = false;
-
-  constructor(private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
-    const savedUser = localStorage.getItem('melodia_user');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      this.apodo = user.apodo || '';
-      this.selectedIndex = user.icono_index || 0;
-      this.isLoggedIn = true;
+    void this.auth.init();
+    if (isPlatformBrowser(this.platformId)) {
+      const params = new URLSearchParams(location.search);
+      const authError = params.get('authError');
+      if (authError === 'google') {
+        this.authError.set('No se pudo iniciar sesión con Google. Inténtalo de nuevo.');
+      }
+      if (authError) {
+        params.delete('authError');
+        const next = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}${location.hash}`;
+        history.replaceState(null, '', next);
+      }
     }
   }
 
-  guardarApodo(): void {
-    if (!this.isLoggedIn) return;
+  dismissAuthError(): void {
+    this.authError.set(null);
+  }
 
-    const savedUser = localStorage.getItem('melodia_user');
-    if (!savedUser) return;
-
-    const user = JSON.parse(savedUser);
-    user.apodo = this.apodo;
-    user.icono_index = this.selectedIndex;
-    localStorage.setItem('melodia_user', JSON.stringify(user));
-
-    // Notificar al header del cambio
-    window.dispatchEvent(new Event('storage'));
-
-    this.usuarioService.guardarUsuario({
-      google_id: user.google_id,
-      nombre: user.name,
-      email: user.email,
-      foto_url: user.picture,
-      apodo: this.apodo,
-      icono_index: this.selectedIndex
-    }).subscribe({
-      next: () => {
-        this.guardado = true;
-        setTimeout(() => this.guardado = false, 2000);
-      },
-      error: (err) => console.error('Error guardando apodo:', err)
-    });
+  getInitials(name: string) {
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? '' : '';
+    return `${first}${last}`.toUpperCase();
   }
 
   selectAvatar(index: number): void {

@@ -1,0 +1,76 @@
+<div class="login-page">
+  <div class="stars-bg" id="login-stars"></div>
+  
+  <div class="login-content">
+    <!-- Header visual -->
+    <div class="mb-10 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight" style="color: rgba(255,255,255,0.95);">MelodIA</h1>
+      <p class="text-sm mt-2" style="color: rgba(255,255,255,0.55);">Tu estudio musical con IA</p>
+    </div>
+
+    <!-- Caja de login -->
+    <div class="w-full max-w-md rounded-2xl border px-8 py-8 backdrop-blur-xl"
+      style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+
+      <div class="flex flex-col gap-2 mb-8 text-center">
+        <div class="text-xl font-bold" style="color: rgba(255,255,255,0.9);">Iniciar sesión</div>
+        <div class="text-sm" style="color: rgba(255,255,255,0.65);">
+          Accede para guardar y gestionar tus creaciones
+        </div>
+      </div>
+
+      <div *ngIf="error" class="mb-6 px-4 py-3 rounded-xl border flex items-start gap-3"
+        style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.25); color: rgba(255,255,255,0.9);">
+        <svg class="w-5 h-5 shrink-0 mt-0.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <div class="text-sm font-semibold">Error de acceso</div>
+          <div class="text-xs mt-0.5" style="color: rgba(255,255,255,0.7);">{{ error }}</div>
+        </div>
+      </div>
+
+      <button
+        (click)="login()"
+        [disabled]="auth.loading()"
+        class="w-full h-12 px-4 rounded-xl text-sm font-semibold border transition-all flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+        style="background: rgba(255,255,255,0.95); border-color: rgba(255,255,255,0.65); color: rgba(17,24,39,1); box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.1);"
+      >
+        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true" *ngIf="!auth.loading()">
+          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.657 32.657 29.243 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.584 6.053 29.584 4 24 4 12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 19.023 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.584 6.053 29.584 4 24 4c-7.681 0-14.354 4.319-17.694 10.691z"/>
+          <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.194-5.238C29.17 35.091 26.715 36 24 36c-5.222 0-9.624-3.323-11.283-7.946l-6.52 5.025C9.505 39.556 16.227 44 24 44z"/>
+          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.241-2.231 4.164-4.088 5.57l.003-.002 6.194 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+        </svg>
+        <svg *ngIf="auth.loading()" class="animate-spin h-5 w-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {{ auth.loading() ? 'Conectando...' : 'Continuar con Google' }}
+      </button>
+
+      <div class="mt-6 flex items-center justify-center">
+        <label class="flex items-center gap-2 cursor-pointer select-none group">
+          <div class="relative flex items-center justify-center w-5 h-5 rounded border transition-colors"
+               [ngStyle]="{'background': remember ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.1)', 'border-color': remember ? 'transparent' : 'rgba(255,255,255,0.3)'}">
+            <input type="checkbox" [(ngModel)]="remember" class="absolute opacity-0 w-full h-full cursor-pointer" />
+            <svg *ngIf="remember" class="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span class="text-sm transition-colors" style="color: rgba(255,255,255,0.65);" [class.text-white]="remember">
+            Mantener sesión iniciada
+          </span>
+        </label>
+      </div>
+
+    </div>
+
+    <div class="mt-10 text-xs text-center leading-relaxed max-w-sm mx-auto" style="color: rgba(255,255,255,0.4);">
+      Al continuar, aceptas nuestros <a href="#" class="hover:text-white underline decoration-transparent hover:decoration-white transition-all">Términos de servicio</a> y <a href="#" class="hover:text-white underline decoration-transparent hover:decoration-white transition-all">Política de privacidad</a>.
+    </div>
+  </div>
+</div>

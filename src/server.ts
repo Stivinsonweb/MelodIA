@@ -6,11 +6,19 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { registerGoogleAuth } from './auth/google-oauth';
+import { requireAuthForApi, requireAuthForHtml } from './auth/require-auth';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+registerGoogleAuth(app);
+app.use('/api', requireAuthForApi());
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -39,12 +47,14 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
-    .catch(next);
+  requireAuthForHtml()(req, res, () => {
+    angularApp
+      .handle(req)
+      .then((response) =>
+        response ? writeResponseToNodeResponse(response, res) : next(),
+      )
+      .catch(next);
+  });
 });
 
 /**
