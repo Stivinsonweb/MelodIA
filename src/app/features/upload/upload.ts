@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiinService } from '../../core/services/apiin';
+import { UsuarioService } from '../../core/services/usuario';
+import { CancionService } from '../../core/services/cancion';
 
 @Component({
   selector: 'app-upload',
@@ -10,117 +12,136 @@ import { ApiinService } from '../../core/services/apiin';
   templateUrl: './upload.html',
   styleUrl: './upload.css'
 })
-export class Upload {
-  selectedMood: string = '';
+export class Upload implements OnInit {
   texto: string = '';
-  imagenBase64: string = '';
-  imagenNombre: string = '';
   cargando: boolean = false;
-  modo: 'texto' | 'imagen' | '' = '';
+  isLoggedIn: boolean = false;
+  errorMensaje: string = '';
+  exitoMensaje: string = '';
 
-  moods = ['Feliz', 'Nostálgico', 'Romántico', 'Energético', 'Melancólico', 'Relajado'];
+  constructor(
+    private apiinService: ApiinService,
+    private usuarioService: UsuarioService,
+    private cancionService: CancionService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  constructor(private apiinService: ApiinService) {}
-
-  selectMood(mood: string): void {
-    this.selectedMood = mood;
+  ngOnInit(): void {
+    const savedUser = localStorage.getItem('melodia_user');
+    this.isLoggedIn = !!savedUser;
+    window.addEventListener('usuarioCargado', () => {
+      this.isLoggedIn = true;
+      this.cdr.detectChanges();
+    });
+    window.addEventListener('usuarioCerroSesion', () => {
+      this.isLoggedIn = false;
+      this.cdr.detectChanges();
+    });
   }
 
-  onTextoChange(): void {
-    if (this.texto.trim()) {
-      this.modo = 'texto';
-      this.imagenBase64 = '';
-      this.imagenNombre = '';
-    } else {
-      this.modo = '';
-    }
+  mostrarError(mensaje: string): void {
+    this.errorMensaje = mensaje;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.errorMensaje = '';
+      this.cdr.detectChanges();
+    }, 4000);
   }
 
-  onImagenSeleccionada(event: any): void {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    this.texto = '';
-    this.modo = 'imagen';
-    this.imagenNombre = file.name;
-
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.imagenBase64 = e.target.result.split(',')[1];
-    };
-    reader.readAsDataURL(file);
-  }
-
-  limpiarImagen(): void {
-    this.imagenBase64 = '';
-    this.imagenNombre = '';
-    this.modo = '';
+  mostrarExito(mensaje: string): void {
+    this.exitoMensaje = mensaje;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.exitoMensaje = '';
+      this.cdr.detectChanges();
+    }, 3000);
   }
 
   async generarCancion(): Promise<void> {
-    if (!this.texto && !this.imagenBase64 && !this.selectedMood) {
-      alert('Escribe cómo te sientes o sube una imagen');
+    if (!this.texto.trim()) {
+      this.mostrarError('✏️ Escribe cómo te sientes para generar tu canción');
       return;
     }
 
-    const user = localStorage.getItem('melodia_user');
-    if (!user) {
-      alert('Debes iniciar sesión para generar una canción');
+    if (this.texto.trim().length < 5) {
+      this.mostrarError('✏️ Describe un poco más cómo te sientes');
       return;
     }
 
     this.cargando = true;
+    this.errorMensaje = '';
+    this.cdr.detectChanges();
+    this.cancionService.setCargando(true);
+    this.cancionService.setCancion(null);
 
     try {
-      // Paso 1: Analizar mood
-      const moodRes: any = await this.apiinService
-        .analizarMood(this.texto || this.selectedMood, this.imagenBase64)
+      const res: any = await this.apiinService
+        .generarCancionCompleta(this.texto)
         .toPromise();
 
-      console.log('Respuesta mood:', moodRes);
-
-      if (!moodRes || !moodRes.content || !moodRes.content[0]) {
-        console.error('Respuesta inválida:', moodRes);
-        alert('Error en la respuesta de la IA. Revisa la consola.');
+      if (!res || !res.content || !res.content[0]) {
+        this.mostrarError('❌ Error al conectar con la IA. Intenta de nuevo.');
         return;
       }
 
-      const moodContent = moodRes.content[0].text
-        .replace(/```json|```/g, '').trim();
-      const moodData = JSON.parse(moodContent);
-
-      console.log('Mood detectado:', moodData);
-
-      // Paso 2: Generar letra
-      const letraRes: any = await this.apiinService
-        .generarLetra(moodData.mood, moodData.emocion, moodData.descripcion)
-        .toPromise();
-
-      console.log('Respuesta letra:', letraRes);
-
-      if (!letraRes || !letraRes.content || !letraRes.content[0]) {
-        console.error('Respuesta letra inválida:', letraRes);
-        alert('Error generando la letra. Revisa la consola.');
+      let data: any;
+      try {
+        data = JSON.parse(
+          res.content[0].text.replace(/```json|```/g, '').trim()
+        );
+      } catch (e) {
+        this.mostrarError('❌ Error procesando la respuesta. Intenta de nuevo.');
         return;
       }
 
-      const letra = letraRes.content[0].text;
+      if (!data.letra) {
+        this.mostrarError('❌ No se pudo generar la letra. Intenta con otro texto.');
+        return;
+      }
 
-      // Emitir resultado al player
-      window.dispatchEvent(new CustomEvent('cancionGenerada', {
-        detail: {
-          letra,
-          mood: moodData.mood,
-          moodData,
-          imagenRuta: this.imagenNombre
+      const user = localStorage.getItem('melodia_user');
+      const usuarioId = localStorage.getItem('melodia_user_id');
+      const isLoggedIn = !!(user && usuarioId);
+
+      if (isLoggedIn) {
+        try {
+          await this.usuarioService.guardarHistorial({
+            usuario_id: usuarioId,
+            mood: data.mood,
+            letra: data.letra,
+            task_id: '',
+            imagen_ruta: '',
+            titulo: `MelodIA - ${data.mood}`
+          }).toPromise();
+        } catch (e) {
+          console.error('Error guardando historial:', e);
         }
-      }));
+      }
 
-    } catch (error) {
-      console.error('Error generando canción:', error);
-      alert('Error al generar la canción. Intenta de nuevo.');
+      this.mostrarExito('🎵 ¡Canción generada exitosamente!');
+
+      this.cancionService.setCancion({
+        letra: data.letra,
+        mood: data.mood,
+        moodData: data,
+        isLoggedIn
+      });
+
+    } catch (error: any) {
+      console.error('Error:', error);
+      if (error?.status === 0) {
+        this.mostrarError('🌐 Error de conexión. Verifica tu internet e intenta de nuevo.');
+      } else if (error?.status === 429) {
+        this.mostrarError('⏳ Demasiadas solicitudes. Espera un momento e intenta de nuevo.');
+      } else if (error?.status === 500) {
+        this.mostrarError('🔧 Error en el servidor. Intenta de nuevo en unos segundos.');
+      } else {
+        this.mostrarError('❌ Error al generar la canción. Intenta de nuevo.');
+      }
     } finally {
       this.cargando = false;
+      this.cdr.detectChanges();
+      this.cancionService.setCargando(false);
     }
   }
 }

@@ -1,87 +1,92 @@
 <div class="rounded-2xl p-5 border"
   style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);">
 
+  <!-- Header -->
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-2">
-      <div class="w-2 h-2 rounded-full" style="background: #818cf8;"></div>
+      <div class="w-2 h-2 rounded-full animate-pulse" [style]="'background: ' + moodColor"></div>
       <span class="text-xs uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">
         Tu canción generada
       </span>
     </div>
-    <span *ngIf="mood"
-      class="text-xs px-2 py-1 rounded-full border"
-      style="color: rgba(192,132,252,0.8); border-color: rgba(192,132,252,0.3); background: rgba(192,132,252,0.1);">
+    <span *ngIf="mood" class="text-xs px-3 py-1 rounded-full border font-medium"
+      [style]="'color: ' + moodColor + '; border-color: ' + moodColor + '40; background: ' + moodColor + '15;'">
       {{ mood }}
     </span>
   </div>
 
   <!-- Cargando -->
   <div *ngIf="cargando"
-    class="flex flex-col items-center justify-center gap-3 mb-3"
-    style="height: 150px;">
-    <svg class="animate-spin" width="32" height="32" viewBox="0 0 24 24"
-      fill="none" stroke="#c084fc" stroke-width="2">
+    class="flex flex-col items-center justify-center gap-3 mb-3 rounded-xl border"
+    style="height: 260px; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
+    <svg class="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2">
       <path d="M21 12a9 9 0 11-6.219-8.56"/>
     </svg>
-    <p class="text-xs" style="color: rgba(255,255,255,0.4);">
-      Componiendo tu canción...
-    </p>
+    <p class="text-xs" style="color: rgba(255,255,255,0.4);">Componiendo tu canción...</p>
   </div>
 
   <!-- Letra -->
   <div *ngIf="!cargando"
+    id="lyricsBox"
     class="rounded-xl p-4 mb-3 border overflow-y-auto"
-    style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); height: 150px;">
-    <div *ngFor="let line of lyrics"
-      class="text-sm leading-loose"
-      [style]="line.active ?
-        'color: #c084fc; font-weight: 500;' :
-        'color: rgba(255,255,255,0.7);'">
-      {{line.text}}
+    style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); height: 260px;">
+
+    <div *ngIf="!cancionGenerada" class="flex flex-col items-center justify-center h-full gap-2">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5">
+        <path d="M9 19V6l12-3v13M9 19c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2zm12-3c0 1.1-1.34 2-3 2s-3-.9-3-2 1.34-2 3-2 3 .9 3 2z"/>
+      </svg>
+      <p class="text-xs" style="color: rgba(255,255,255,0.2);">Tu canción aparecerá aquí...</p>
     </div>
-  </div>
 
-  <!-- Audio oculto -->
-
-  <!-- Player -->
-  <div class="rounded-xl p-3 mb-3 border"
-    style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
-    <div class="flex items-center gap-3">
-      <button
-        (click)="togglePlay()"
-        [disabled]="!cancionGenerada"
-        class="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer border flex-shrink-0"
-        style="background: rgba(192,132,252,0.2); border-color: rgba(192,132,252,0.4);">
-        <svg *ngIf="!isPlaying" width="12" height="12" viewBox="0 0 24 24" fill="#c084fc">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        <svg *ngIf="isPlaying" width="12" height="12" viewBox="0 0 24 24" fill="#c084fc">
-          <rect x="6" y="4" width="4" height="16"/>
-          <rect x="14" y="4" width="4" height="16"/>
-        </svg>
-      </button>
-
-      <div class="flex-1">
-        <div class="rounded-full overflow-hidden mb-1"
-          style="height: 3px; background: rgba(255,255,255,0.1);">
-          <div class="h-full rounded-full"
-            style="width: 35%; background: linear-gradient(90deg, #7c3aed, #c084fc);"></div>
-        </div>
-        <div class="text-xs" style="color: rgba(255,255,255,0.3);">
-          {{ cancionGenerada ? 'Listo para reproducir' : cargando ? 'Generando...' : 'Esperando...' }}
-        </div>
+    <ng-container *ngFor="let line of lyricsDisplay">
+      <!-- Etiqueta de sección -->
+      <div *ngIf="line.tipo === 'seccion'"
+        class="text-xs font-bold uppercase tracking-widest mt-3 mb-1"
+        [style]="'color: ' + moodColor + '80;'">
+        — {{ line.text }} —
       </div>
+
+      <!-- Separador -->
+      <div *ngIf="line.tipo === 'separador'" style="height: 8px;"></div>
+
+      <!-- Línea de letra -->
+      <div *ngIf="line.tipo === 'letra'"
+        class="transition-all duration-500 leading-relaxed"
+        [style]="line.active ?
+          'font-size: 15px; font-weight: 600; opacity: 1; color: ' + moodColor + '; text-shadow: 0 0 20px ' + moodColor + '50; transform: translateX(4px);' :
+          'font-size: 13px; opacity: 0.55; color: rgba(255,255,255,0.7);'">
+        {{ line.text }}
+      </div>
+    </ng-container>
+
+    <span *ngIf="cancionGenerada && lyricsDisplay.length < lyrics.length"
+      class="inline-block w-1 h-4 ml-1 animate-pulse"
+      [style]="'background: ' + moodColor + '; vertical-align: middle;'">
+    </span>
+  </div>
+
+  <!-- Visualizador de ondas -->
+  <div *ngIf="cancionGenerada"
+    class="flex items-end justify-center gap-0.5 rounded-xl px-4 mb-3"
+    style="height: 48px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+    <div *ngFor="let barra of barras; let i = index"
+      class="rounded-full"
+      [style]="'width: 3px; height: ' + alturas[i] + 'px; background: linear-gradient(to top, ' + moodColor + '60, ' + moodColor + '); transition: height 0.1s ease;'">
     </div>
   </div>
 
-  <button
-    (click)="descargar()"
-    [disabled]="!cancionGenerada"
-    class="w-full py-2 rounded-xl text-sm cursor-pointer border transition-all"
+  <!-- Botón descargar -->
+  <button (click)="descargar()" [disabled]="!cancionGenerada"
+    class="w-full py-2.5 rounded-xl text-sm cursor-pointer border transition-all flex items-center justify-center gap-2"
     [style]="cancionGenerada ?
-      'background: transparent; border-color: rgba(192,132,252,0.35); color: rgba(192,132,252,0.8);' :
+      'background: transparent; border-color: ' + moodColor + '50; color: ' + moodColor + ';' :
       'background: transparent; border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); cursor: not-allowed;'">
-    Descargar letra (.txt) y audio (.mp3)
+    <svg *ngIf="cancionGenerada" width="14" height="14" viewBox="0 0 24 24" fill="none" [attr.stroke]="moodColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    {{ cancionGenerada ? 'Descargar letra (.txt)' : 'Esperando canción...' }}
   </button>
 
 </div>

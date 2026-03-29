@@ -1,6 +1,7 @@
 <div class="flex items-center justify-center gap-5 mb-7 px-7 py-4 rounded-2xl border"
   style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
 
+  <!-- Avatar principal -->
   <div class="w-14 h-14 rounded-full flex items-center justify-center border-2 cursor-pointer flex-shrink-0"
     style="background: linear-gradient(135deg, #7c3aed, #4f46e5); border-color: rgba(192,132,252,0.4);">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
@@ -19,6 +20,7 @@
     </svg>
   </div>
 
+  <!-- Selector de avatares -->
   <div class="flex gap-2">
     <div (click)="selectAvatar(0)" class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer border-2 transition-all"
       [style]="selectedIndex === 0 ? 'border-color: #c084fc; background: rgba(192,132,252,0.12)' : 'border-color: transparent; background: rgba(255,255,255,0.07)'">
@@ -60,6 +62,7 @@
     </div>
   </div>
 
+  <!-- Apodo -->
   <div class="flex flex-col gap-1">
     <label class="text-xs uppercase tracking-widest" style="color: rgba(255,255,255,0.4);">Tu apodo</label>
     <div class="flex items-center gap-2">
@@ -72,13 +75,20 @@
           class="bg-transparent border-none outline-none text-sm px-3 flex-1"
           style="color: white;" />
       </div>
-      <button
-        (click)="guardarApodo()"
+      <button (click)="guardarApodo()"
         class="px-3 h-9 rounded-lg text-xs font-medium cursor-pointer border-none transition-all"
         style="background: rgba(192,132,252,0.2); color: #c084fc; border: 0.5px solid rgba(192,132,252,0.4);">
-        {{ guardado ? '✓ Guardado' : 'Guardar' }}
+        {{ guardado ? '✓' : 'Guardar' }}
       </button>
     </div>
-  </div>
 
+    <!-- Alerta -->
+    <div *ngIf="alertaMensaje"
+      class="text-xs px-3 py-1 rounded-lg mt-1"
+      [style]="alertaTipo === 'success' ?
+        'background: rgba(16,185,129,0.15); color: rgba(16,185,129,0.9);' :
+        'background: rgba(239,68,68,0.15); color: rgba(239,68,68,0.9);'">
+      {{ alertaMensaje }}
+    </div>
+  </div>
 </div>

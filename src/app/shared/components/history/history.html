@@ -1,4 +1,5 @@
-<div class="rounded-2xl p-5 mb-0 border"
+<!-- Historial -->
+<div class="rounded-2xl p-5 border mb-4"
   style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);">
 
   <div class="flex items-center gap-2 mb-4">
@@ -12,35 +13,96 @@
   <div *ngIf="!isLoggedIn"
     class="flex flex-col items-center justify-center py-8 gap-3 rounded-xl border"
     style="border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,0.3)" stroke-width="1.5">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
-    <p class="text-sm" style="color: rgba(255,255,255,0.3);">
-      Inicia sesión para ver tu historial
+    <p class="text-sm font-medium" style="color: rgba(255,255,255,0.5);">
+      Inicia sesión para guardar tus canciones
+    </p>
+    <p class="text-xs text-center px-6" style="color: rgba(255,255,255,0.25);">
+      Con una cuenta puedes guardar tu historial de letras generadas y descargarlas cuando quieras
     </p>
   </div>
 
-  <!-- Con sesión -->
-  <div *ngIf="isLoggedIn" class="grid grid-cols-3 gap-3">
-    <div *ngFor="let item of history"
-      class="rounded-xl p-3 cursor-pointer border transition-all"
-      style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08);"
-      (mouseenter)="onHover($event, true)"
-      (mouseleave)="onHover($event, false)">
-      <div class="text-xs uppercase tracking-wider mb-1"
-        style="color: rgba(192,132,252,0.7);">
+  <!-- Cargando -->
+  <div *ngIf="isLoggedIn && cargando" class="flex items-center justify-center py-8">
+    <svg class="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2">
+      <path d="M21 12a9 9 0 11-6.219-8.56"/>
+    </svg>
+  </div>
+
+  <!-- Sin canciones -->
+  <div *ngIf="isLoggedIn && !cargando && historial.length === 0"
+    class="flex flex-col items-center justify-center py-8 gap-2 rounded-xl border"
+    style="border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+    <p class="text-sm" style="color: rgba(255,255,255,0.3);">Aún no has generado canciones</p>
+  </div>
+
+  <!-- Historial grid -->
+  <div *ngIf="isLoggedIn && !cargando && historial.length > 0" class="grid grid-cols-3 gap-3">
+    <div *ngFor="let item of historial"
+      class="rounded-xl p-3 border transition-all"
+      style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
+      <div class="text-xs uppercase tracking-wider mb-1 font-medium" style="color: rgba(192,132,252,0.8);">
         {{item.mood}}
       </div>
-      <div class="text-xs mb-1"
-        style="color: rgba(255,255,255,0.6);">
-        {{item.title}}
+      <div class="text-xs mb-1 truncate" style="color: rgba(255,255,255,0.6);">
+        {{item.titulo || 'Sin título'}}
       </div>
-      <div class="text-xs"
-        style="color: rgba(255,255,255,0.25);">
-        {{item.date}}
+      <div class="text-xs mb-3" style="color: rgba(255,255,255,0.2);">
+        {{item.created_at | date:'dd MMM, h:mm a'}}
+      </div>
+      <button (click)="descargarLetra(item)"
+        class="w-full py-1.5 rounded-lg text-xs cursor-pointer border transition-all flex items-center justify-center gap-1"
+        style="background: transparent; border-color: rgba(192,132,252,0.3); color: rgba(192,132,252,0.7);">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,0.7)" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Descargar letra
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Creadores en la plataforma -->
+<div class="rounded-2xl p-5 border"
+  style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);">
+
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-2 h-2 rounded-full" style="background: #818cf8;"></div>
+    <span class="text-xs uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">
+      Creadores en MelodIA
+    </span>
+  </div>
+
+  <!-- Sin usuarios -->
+  <div *ngIf="usuariosRecientes.length === 0"
+    class="flex items-center justify-center py-6">
+    <p class="text-xs" style="color: rgba(255,255,255,0.2);">Cargando creadores...</p>
+  </div>
+
+  <!-- Grid usuarios -->
+  <div *ngIf="usuariosRecientes.length > 0" class="flex flex-wrap gap-3">
+    <div *ngFor="let usuario of usuariosRecientes"
+      class="flex items-center gap-2 px-3 py-2 rounded-xl border"
+      style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
+      <img
+        [src]="getAvatarUrl(usuario)"
+        [alt]="usuario.nombre"
+        (error)="onImageError($event, usuario)"
+        class="w-8 h-8 rounded-full border flex-shrink-0"
+        style="border-color: rgba(192,132,252,0.4); object-fit: cover;"/>
+      <div class="flex flex-col">
+        <span class="text-xs font-medium" style="color: rgba(255,255,255,0.8);">
+          {{ usuario.apodo ? '@' + usuario.apodo : usuario.nombre.split(' ')[0] }}
+        </span>
+        <span class="text-xs" style="color: rgba(255,255,255,0.25);">
+          {{ usuario.total_canciones }} {{ usuario.total_canciones == 1 ? 'canción' : 'canciones' }}
+        </span>
       </div>
     </div>
   </div>
-
 </div>

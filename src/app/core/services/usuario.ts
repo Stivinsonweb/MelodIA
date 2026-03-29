@@ -16,4 +16,20 @@ export class UsuarioService {
   obtenerUsuario(email: string) {
     return this.http.get(`${this.apiUrl}/obtener-usuario.php?email=${email}`);
   }
+
+  guardarHistorial(data: any) {
+    return this.http.post(`${this.apiUrl}/guardar-historial.php`, data);
+  }
+
+  obtenerAudio(taskId: string) {
+    return this.http.get(`${this.apiUrl}/obtener-audio.php?task_id=${taskId}`);
+  }
+
+  obtenerHistorial(usuarioId: number) {
+    return this.http.get(`${this.apiUrl}/obtener-historial.php?usuario_id=${usuarioId}`);
+  }
+
+  obtenerUsuariosRecientes() {
+    return this.http.get(`${this.apiUrl}/obtener-usuarios-recientes.php`);
+  }
 }

@@ -7,7 +7,6 @@
   </div>
 
   <div class="flex items-center justify-center gap-3">
-
     <!-- Sin sesión -->
     <button *ngIf="!user"
       (click)="loginWithGoogle()"
@@ -29,13 +28,11 @@
         <span class="text-sm font-medium" style="color: rgba(255,255,255,0.9);">{{ user.name }}</span>
         <span *ngIf="user.apodo" class="text-xs" style="color: rgba(192,132,252,0.7);">@{{ user.apodo }}</span>
       </div>
-      <button
-        (click)="logout()"
+      <button (click)="logout()"
         class="px-3 py-1 rounded-lg text-xs border cursor-pointer transition-all"
         style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5);">
         Cerrar sesión
       </button>
     </div>
-
   </div>
 </div>
