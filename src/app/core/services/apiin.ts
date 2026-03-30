@@ -6,7 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class ApiinService {
   private claudeUrl = 'https://api.anthropic.com/v1/messages';
-  private claudeKey = 'YOUR_ANTHROPIC_API_KEY'; // ⚠️ Reemplaza con tu API key real (no la subas al repo)
+  private claudeKey = 'CLAUDE_KEY_HERE';
   private proxyUrl = 'https://vps22920.cubepath.net/api/proxy.php';
 
   constructor(private http: HttpClient) {}
@@ -57,7 +57,6 @@ export class ApiinService {
     }, { headers });
   }
 
-  // Suno via proxy PHP en el servidor (evita CORS)
   generarMusica(letra: string, genero: string, mood: string) {
     return this.http.post(this.proxyUrl, {
       service: 'apiin',
@@ -72,7 +71,6 @@ export class ApiinService {
     });
   }
 
-  // Verificar tarea via proxy PHP
   verificarTarea(taskId: string) {
     return this.http.post(this.proxyUrl, {
       service: 'apiin',
