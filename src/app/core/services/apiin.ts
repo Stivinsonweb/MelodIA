@@ -72,9 +72,9 @@ export class ApiinService {
     });
   }
 
-  verificarAudio(taskId: string) {
+    verificarAudio(taskId: string) {
     return this.http.get(
-      `https://vps22920.cubepath.net/api/obtener-audio.php?task_id=${taskId}`
+      `https://vps22920.cubepath.net/api/verificar-audio.php?task_id=${taskId}`
     );
   }
 }
