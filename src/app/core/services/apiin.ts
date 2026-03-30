@@ -66,17 +66,15 @@ export class ApiinService {
         prompt: letra,
         style: `${genero}, ${mood}, spanish lyrics, emotional`,
         make_instrumental: false,
-        title: `MelodIA - ${mood}`
+        title: `MelodIA - ${mood}`,
+        callback_url: 'https://vps22920.cubepath.net/api/suno-callback.php'
       }
     });
   }
 
-  verificarTarea(taskId: string) {
-    return this.http.post(this.proxyUrl, {
-      service: 'apiin',
-      endpoint: `tasks/${taskId}`,
-      method: 'GET',
-      payload: {}
-    });
+  verificarAudio(taskId: string) {
+    return this.http.get(
+      `https://vps22920.cubepath.net/api/obtener-audio.php?task_id=${taskId}`
+    );
   }
 }
