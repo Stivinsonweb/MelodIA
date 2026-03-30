@@ -4,6 +4,7 @@
   position: relative;
   overflow: hidden;
   padding: 24px 24px 0;
+  transition: background 1.5s ease;
 }
 
 .stars-bg {
@@ -11,6 +12,23 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
+}
+
+.mood-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: all 1.5s ease;
+  opacity: 0;
+}
+
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
 }
 
 .content {
@@ -25,4 +43,18 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.3);
+    opacity: 0;
+  }
 }

@@ -15,7 +15,7 @@
     </span>
   </div>
 
-  <!-- Cargando letra -->
+  <!-- Cargando -->
   <div *ngIf="cargando"
     class="flex flex-col items-center justify-center gap-3 mb-3 rounded-xl border"
     style="height: 260px; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
@@ -39,12 +39,17 @@
     </div>
 
     <ng-container *ngFor="let line of lyricsDisplay">
+      <!-- Etiqueta de sección -->
       <div *ngIf="line.tipo === 'seccion'"
         class="text-xs font-bold uppercase tracking-widest mt-3 mb-1"
         [style]="'color: ' + moodColor + '80;'">
         — {{ line.text }} —
       </div>
+
+      <!-- Separador -->
       <div *ngIf="line.tipo === 'separador'" style="height: 8px;"></div>
+
+      <!-- Línea de letra -->
       <div *ngIf="line.tipo === 'letra'"
         class="transition-all duration-500 leading-relaxed"
         [style]="line.active ?
@@ -70,61 +75,6 @@
     </div>
   </div>
 
-  <!-- Audio oculto -->
-  <audio id="audioPlayer" [src]="audioUrl" (ended)="isPlaying = false"></audio>
-
-  <!-- Player de música -->
-  <div *ngIf="isLoggedIn" class="rounded-xl p-3 mb-3 border"
-    style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
-
-    <!-- Generando música -->
-    <div *ngIf="cargandoMusica" class="flex items-center gap-3">
-      <svg class="animate-spin flex-shrink-0" width="20" height="20" viewBox="0 0 24 24"
-        fill="none" stroke="#c084fc" stroke-width="2">
-        <path d="M21 12a9 9 0 11-6.219-8.56"/>
-      </svg>
-      <div class="flex-1">
-        <div class="text-xs mb-1" style="color: rgba(255,255,255,0.5);">
-          Generando música con IA... {{ tiempoEspera }}s
-        </div>
-        <div class="rounded-full overflow-hidden" style="height: 3px; background: rgba(255,255,255,0.1);">
-          <div class="h-full rounded-full animate-pulse"
-            [style]="'width: 60%; background: linear-gradient(90deg, #7c3aed, ' + moodColor + ');'">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Player listo -->
-    <div *ngIf="!cargandoMusica" class="flex items-center gap-3">
-      <button (click)="togglePlay()" [disabled]="!musicaGenerada"
-        class="w-9 h-9 rounded-full flex items-center justify-center border flex-shrink-0"
-        [style]="musicaGenerada ?
-          'background: rgba(192,132,252,0.2); border-color: rgba(192,132,252,0.4); cursor: pointer;' :
-          'background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); cursor: not-allowed;'">
-        <svg *ngIf="!isPlaying" width="12" height="12" viewBox="0 0 24 24"
-          [attr.fill]="musicaGenerada ? moodColor : 'rgba(255,255,255,0.3)'">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        <svg *ngIf="isPlaying" width="12" height="12" viewBox="0 0 24 24" [attr.fill]="moodColor">
-          <rect x="6" y="4" width="4" height="16"/>
-          <rect x="14" y="4" width="4" height="16"/>
-        </svg>
-      </button>
-      <div class="flex-1">
-        <div class="rounded-full overflow-hidden mb-1"
-          style="height: 3px; background: rgba(255,255,255,0.1);">
-          <div class="h-full rounded-full transition-all duration-1000"
-            [style]="'width: ' + (musicaGenerada ? '100%' : '0%') + '; background: linear-gradient(90deg, #7c3aed, ' + moodColor + ');'">
-          </div>
-        </div>
-        <div class="text-xs" style="color: rgba(255,255,255,0.3);">
-          {{ musicaGenerada ? '🎵 Música lista — dale play' : cancionGenerada ? 'Esperando música...' : 'Esperando...' }}
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Botón descargar -->
   <button (click)="descargar()" [disabled]="!cancionGenerada"
     class="w-full py-2.5 rounded-xl text-sm cursor-pointer border transition-all flex items-center justify-center gap-2"
@@ -137,7 +87,7 @@
       <polyline points="7 10 12 15 17 10"/>
       <line x1="12" y1="15" x2="12" y2="3"/>
     </svg>
-    {{ cancionGenerada ? (musicaGenerada ? 'Descargar letra + audio' : 'Descargar letra (.txt)') : 'Esperando canción...' }}
+    {{ cancionGenerada ? 'Descargar letra (.txt)' : 'Esperando canción...' }}
   </button>
 
 </div>

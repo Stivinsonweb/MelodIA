@@ -1,8 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { ApiinService } from '../../core/services/apiin';
-import { UsuarioService } from '../../core/services/usuario';
 import { CancionService } from '../../core/services/cancion';
 
 @Component({
@@ -14,17 +12,10 @@ import { CancionService } from '../../core/services/cancion';
 })
 export class Player implements OnInit, OnDestroy {
   cargando = false;
-  cargandoMusica = false;
   lyrics: { text: string; tipo: string; active: boolean }[] = [];
   lyricsDisplay: { text: string; tipo: string; active: boolean }[] = [];
   mood: string = '';
-  genero: string = 'ballad';
   cancionGenerada = false;
-  musicaGenerada = false;
-  audioUrl: string = '';
-  isPlaying = false;
-  tiempoEspera = 0;
-  isLoggedIn = false;
   lineaActual = -1;
   barras = Array.from({ length: 20 }, (_, i) => i);
   alturas: number[] = Array(20).fill(5);
@@ -35,8 +26,6 @@ export class Player implements OnInit, OnDestroy {
   private typingInterval: any;
   private karaokeInterval: any;
   private ondasInterval: any;
-  private tiempoInterval: any;
-  private pollingInterval: any;
 
   moodColores: Record<string, string> = {
     'melancólico': '#818cf8', 'melancólica': '#818cf8',
@@ -51,8 +40,6 @@ export class Player implements OnInit, OnDestroy {
 
   constructor(
     private cancionService: CancionService,
-    private apiinService: ApiinService,
-    private usuarioService: UsuarioService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -61,15 +48,10 @@ export class Player implements OnInit, OnDestroy {
       this.cargando = cargando;
       if (cargando) {
         this.cancionGenerada = false;
-        this.musicaGenerada = false;
-        this.audioUrl = '';
         this.lyricsDisplay = [];
         this.lineaActual = -1;
-        this.tiempoEspera = 0;
         this.detenerKaraoke();
         this.detenerOndas();
-        if (this.pollingInterval) clearInterval(this.pollingInterval);
-        if (this.tiempoInterval) clearInterval(this.tiempoInterval);
       }
       this.cdr.detectChanges();
     });
@@ -77,11 +59,6 @@ export class Player implements OnInit, OnDestroy {
     this.cancionSub = this.cancionService.cancion$.subscribe(detail => {
       if (detail) this.recibirCancion(detail);
     });
-
-    const savedUser = localStorage.getItem('melodia_user');
-    this.isLoggedIn = !!savedUser;
-    window.addEventListener('usuarioCargado', () => { this.isLoggedIn = true; });
-    window.addEventListener('usuarioCerroSesion', () => { this.isLoggedIn = false; });
   }
 
   ngOnDestroy(): void {
@@ -90,15 +67,11 @@ export class Player implements OnInit, OnDestroy {
     this.detenerKaraoke();
     this.detenerOndas();
     if (this.typingInterval) clearInterval(this.typingInterval);
-    if (this.tiempoInterval) clearInterval(this.tiempoInterval);
-    if (this.pollingInterval) clearInterval(this.pollingInterval);
   }
 
-  async recibirCancion(detail: any): Promise<void> {
+  recibirCancion(detail: any): void {
     this.cargando = false;
     this.mood = detail.mood;
-    this.genero = detail.moodData?.genero || 'ballad';
-    this.isLoggedIn = detail.isLoggedIn || this.isLoggedIn;
 
     const moodKey = detail.mood?.toLowerCase() || '';
     this.moodColor = this.moodColores[moodKey] || '#c084fc';
@@ -134,86 +107,6 @@ export class Player implements OnInit, OnDestroy {
     this.cancionGenerada = true;
     this.cdr.detectChanges();
     this.animarLetras();
-
-    // Generar música solo si está logueado
-    if (!this.isLoggedIn) return;
-
-    this.cargandoMusica = true;
-    this.iniciarContador();
-    this.cdr.detectChanges();
-
-    try {
-      const musicaRes: any = await this.apiinService
-        .generarMusica(detail.letra, this.genero, this.mood)
-        .toPromise();
-
-      console.log('Respuesta Suno:', musicaRes);
-
-      const taskId = musicaRes?.data?.task_id ||
-                     musicaRes?.task_id ||
-                     musicaRes?.workId ||
-                     musicaRes?.data?.workId;
-
-      if (taskId) {
-        // Guardar historial con task_id
-        const usuarioId = localStorage.getItem('melodia_user_id');
-        if (usuarioId) {
-          await this.usuarioService.guardarHistorial({
-            usuario_id: usuarioId,
-            mood: this.mood,
-            letra: detail.letra,
-            task_id: taskId,
-            imagen_ruta: '',
-            titulo: `MelodIA - ${this.mood}`
-          }).toPromise().catch(e => console.error('Error guardando historial:', e));
-        }
-        await this.esperarAudio(taskId);
-      }
-
-    } catch (error) {
-      console.error('Error generando música:', error);
-    } finally {
-      this.cargandoMusica = false;
-      if (this.tiempoInterval) clearInterval(this.tiempoInterval);
-      this.cdr.detectChanges();
-    }
-  }
-
-  async esperarAudio(taskId: string): Promise<void> {
-    const maxIntentos = 40;
-    let intentos = 0;
-
-    return new Promise((resolve) => {
-      this.pollingInterval = setInterval(async () => {
-        intentos++;
-        try {
-          const res: any = await this.apiinService.verificarAudio(taskId).toPromise();
-          if (res.audio_url) {
-            this.audioUrl = res.audio_url;
-            this.musicaGenerada = true;
-            this.cdr.detectChanges();
-            clearInterval(this.pollingInterval);
-            resolve();
-          } else if (intentos >= maxIntentos) {
-            clearInterval(this.pollingInterval);
-            resolve();
-          }
-        } catch {
-          if (intentos >= maxIntentos) {
-            clearInterval(this.pollingInterval);
-            resolve();
-          }
-        }
-      }, 3000);
-    });
-  }
-
-  iniciarContador(): void {
-    this.tiempoEspera = 0;
-    this.tiempoInterval = setInterval(() => {
-      this.tiempoEspera++;
-      this.cdr.detectChanges();
-    }, 1000);
   }
 
   animarLetras(): void {
@@ -275,21 +168,7 @@ export class Player implements OnInit, OnDestroy {
     }
   }
 
-  togglePlay(): void {
-    if (!this.audioUrl) return;
-    this.isPlaying = !this.isPlaying;
-    const audio = document.getElementById('audioPlayer') as HTMLAudioElement;
-    if (audio) { this.isPlaying ? audio.play() : audio.pause(); }
-  }
-
   descargar(): void {
-    if (this.audioUrl) {
-      const a = document.createElement('a');
-      a.href = this.audioUrl;
-      a.download = `melodia-${this.mood}.mp3`;
-      a.target = '_blank';
-      a.click();
-    }
     const letra = this.lyrics.filter(l => l.tipo !== 'seccion').map(l => l.text).join('\n');
     const blob = new Blob([letra], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

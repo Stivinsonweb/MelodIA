@@ -7,7 +7,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class ApiinService {
   private claudeUrl = 'https://api.anthropic.com/v1/messages';
   private claudeKey = 'CLAUDE_KEY_HERE';
-  private proxyUrl = 'https://vps22920.cubepath.net/api/proxy.php';
 
   constructor(private http: HttpClient) {}
 
@@ -55,26 +54,5 @@ export class ApiinService {
       - La historia debe ser coherente y emotiva de principio a fin`
       }]
     }, { headers });
-  }
-
-  generarMusica(letra: string, genero: string, mood: string) {
-    return this.http.post(this.proxyUrl, {
-      service: 'apiin',
-      endpoint: 'audio/music',
-      payload: {
-        model: 'suno',
-        prompt: letra,
-        style: `${genero}, ${mood}, spanish lyrics, emotional`,
-        make_instrumental: false,
-        title: `MelodIA - ${mood}`,
-        callback_url: 'https://vps22920.cubepath.net/api/suno-callback.php'
-      }
-    });
-  }
-
-    verificarAudio(taskId: string) {
-    return this.http.get(
-      `https://vps22920.cubepath.net/api/verificar-audio.php?task_id=${taskId}`
-    );
   }
 }

@@ -1,5 +1,15 @@
-<div class="app">
+<div class="app" [style]="'background: #0a0a1a; transition: all 1.5s ease;'">
+
+  <!-- Fondo de estrellas -->
   <div class="stars-bg" id="stars"></div>
+
+  <!-- Fondo de mood animado -->
+  <div id="mood-bg" class="mood-bg" [style]="currentBg ? 'background: ' + currentBg + '; opacity: 1;' : 'opacity: 0;'"></div>
+
+  <!-- Partículas flotantes -->
+  <div id="particles" class="particles"></div>
+
+  <!-- Contenido -->
   <div class="content">
     <app-header></app-header>
     <app-user-bar></app-user-bar>
