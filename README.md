@@ -12,7 +12,7 @@
 
 ## 📸 Capturas del proyecto
 
-![MelodIA - Diseño principal](./MelodIA.jpeg)
+![MelodIA - Diseño principal](./MelodIA.png)
 
 > Vista principal con fondo estrellado animado por mood, selector de avatar, panel de entrada de emociones, karaoke animado, historial de canciones y creadores de la plataforma.
 
