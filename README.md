@@ -29,7 +29,7 @@
 7. 📚 **Historial personal** — guarda todas tus canciones si inicias sesión con Google
 
 ---
-
+## Flujo del Sistema
 # ![Flujo ](./Flujo.png)
 
 ## 🛠️ Tecnologías utilizadas
