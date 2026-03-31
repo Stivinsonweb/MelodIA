@@ -30,7 +30,7 @@
 
 ---
 
-# ![Flujo ](./)
+# ![Flujo ](./Flujo.png)
 
 ## 🛠️ Tecnologías utilizadas
 
